@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Celeste.Mod.Entities;
 using Microsoft.Xna.Framework;
 
 namespace Celeste.Mod.Celeste_Multiworld.Locations
@@ -43,7 +44,8 @@ namespace Celeste.Mod.Celeste_Multiworld.Locations
             }
             else
             {
-                Monocle.Engine.TimeRate = 1f;
+                TimeRateModifier timeRateModifier = level?.Tracker.GetComponent<TimeRateModifier>();
+                timeRateModifier?.Enabled = false;
                 Glitch.Value = 0f;
                 if (self.sfx != null)
                 {

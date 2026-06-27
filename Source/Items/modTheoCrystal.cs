@@ -15,7 +15,7 @@ namespace Celeste.Mod.Celeste_Multiworld.Items
 
         public override void Unload()
         {
-            On.Celeste.TheoCrystal.Update += modTheoCrystal_Update;
+            On.Celeste.TheoCrystal.Update -= modTheoCrystal_Update;
         }
 
         private static void modTheoCrystal_Update(On.Celeste.TheoCrystal.orig_Update orig, TheoCrystal self)

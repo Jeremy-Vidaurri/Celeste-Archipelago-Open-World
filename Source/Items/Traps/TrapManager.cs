@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Reflection;
 using M_Color = Microsoft.Xna.Framework.Color;
+using Celeste.Mod.Entities;
 
 namespace Celeste.Mod.Celeste_Multiworld.Items.Traps
 {
@@ -108,7 +109,7 @@ namespace Celeste.Mod.Celeste_Multiworld.Items.Traps
                 }
                 case TrapType.Laughter:
                 {
-                    Level level = (Monocle.Engine.Scene as Level);
+                    Level level = Monocle.Engine.Scene as Level;
                     Player player = level.Entities.FindFirst<Player>();
                     if (player != null)
                     {
@@ -153,20 +154,21 @@ namespace Celeste.Mod.Celeste_Multiworld.Items.Traps
                 case TrapType.Fast:
                 {
                     bool bOtherActive = TrapManager.Instance.IsTrapActive(TrapType.Slow);
+                    TimeRateModifier timeRateModifier = Monocle.Engine.Scene?.Tracker.GetComponent<TimeRateModifier>();
 
                     if (!bOtherActive)
                     {
-                        Monocle.Engine.TimeRate = 1.0f;
+                        timeRateModifier?.Enabled = false;
                     }
                     break;
                 }
                 case TrapType.Slow:
                 {
                     bool bOtherActive = TrapManager.Instance.IsTrapActive(TrapType.Fast);
-
+                    TimeRateModifier timeRateModifier = Monocle.Engine.Scene?.Tracker.GetComponent<TimeRateModifier>();
                     if (!bOtherActive)
                     {
-                        Monocle.Engine.TimeRate = 1.0f;
+                        timeRateModifier?.Enabled = false;
                     }
                     break;
                 }
@@ -184,7 +186,7 @@ namespace Celeste.Mod.Celeste_Multiworld.Items.Traps
                 }
                 case TrapType.Laughter:
                 {
-                    Level level = (Monocle.Engine.Scene as Level);
+                    Level level = Monocle.Engine.Scene as Level;
                     if (level != null)
                     {
                         Hahaha laughter = level.Entities.FindFirst<Hahaha>();
@@ -365,7 +367,7 @@ namespace Celeste.Mod.Celeste_Multiworld.Items.Traps
 
             this.ActiveTraps.RemoveAll(trap => this.IsTrapExpired(trap));
 
-            Level level = (Monocle.Engine.Scene as Level);
+            Level level = Monocle.Engine.Scene as Level;
 
             if (level == null)
             {
@@ -471,7 +473,17 @@ namespace Celeste.Mod.Celeste_Multiworld.Items.Traps
 
                         if (bActive)
                         {
-                            Monocle.Engine.TimeRate = 2.0f;
+                            Level level = Monocle.Engine.Scene as Level;
+
+                            TimeRateModifier timeRateModifier = Monocle.Engine.Scene.Tracker.GetComponent<TimeRateModifier>();
+                            if (timeRateModifier is null)
+                            {
+                                Monocle.Entity timeRateEntity = new Monocle.Entity();
+                                timeRateEntity.Add(timeRateModifier = new TimeRateModifier(2.0f, true));
+                                level.Add(timeRateEntity);
+                            }
+                            timeRateModifier.Enabled = true;
+                            timeRateModifier.Multiplier = 2.0f;
                         }
 
                         break;
@@ -486,7 +498,18 @@ namespace Celeste.Mod.Celeste_Multiworld.Items.Traps
 
                         if (bActive)
                         {
-                            Monocle.Engine.TimeRate = 0.5f;
+                            Level level = Monocle.Engine.Scene as Level;
+
+                            TimeRateModifier timeRateModifier = Monocle.Engine.Scene.Tracker.GetComponent<TimeRateModifier>();
+                            if (timeRateModifier is null)
+                            {
+                                Monocle.Entity timeRateEntity = new Monocle.Entity();
+                                timeRateEntity.Add(timeRateModifier = new TimeRateModifier(0.5f, true));
+                                level.Add(timeRateEntity);
+                            }
+                            timeRateModifier.Enabled = true;
+                            timeRateModifier.Multiplier = 0.5f;
+
                         }
 
                         break;
@@ -516,7 +539,7 @@ namespace Celeste.Mod.Celeste_Multiworld.Items.Traps
                     {
                         if (bActive)
                         {
-                            Level level = (Monocle.Engine.Scene as Level);
+                            Level level = Monocle.Engine.Scene as Level;
                             Player player = level.Entities.FindFirst<Player>();
                             if (player != null)
                             {
@@ -543,7 +566,7 @@ namespace Celeste.Mod.Celeste_Multiworld.Items.Traps
                     }
                     case TrapType.Zoom:
                     {
-                        Level level = (Monocle.Engine.Scene as Level);
+                        Level level = Monocle.Engine.Scene as Level;
                         Player player = level.Entities.FindFirst<Player>();
                         if (player != null)
                         {
@@ -581,9 +604,7 @@ namespace Celeste.Mod.Celeste_Multiworld.Items.Traps
                 return false;
             }
 
-            Level level = (Monocle.Engine.Scene as Level);
-
-            if (level == null)
+            if (Monocle.Engine.Scene is not Level level)
             {
                 return false;
             }
@@ -718,7 +739,7 @@ namespace Celeste.Mod.Celeste_Multiworld.Items.Traps
 
         public bool IsTrapActive(TrapType type)
         {
-            return this.ActiveTraps.Where(item => item.type == type).Count() > 0;
+            return this.ActiveTraps.Count(item => item.type == type) > 0;
         }
 
         public bool IsTrapExpired(BaseTrapInstance trap)
@@ -735,14 +756,7 @@ namespace Celeste.Mod.Celeste_Multiworld.Items.Traps
                 }
             }
 
-            Level level = (Monocle.Engine.Scene as Level);
-
-            if (level == null)
-            {
-                return true;
-            }
-
-            return false;
+            return Monocle.Engine.Scene is not Level level;
         }
 
         public void AddDeathToActiveTraps()

@@ -136,7 +136,7 @@ namespace Celeste.Mod.Celeste_Multiworld
                     CheckLocationsToSend();
                     HandleCollectedLocations();
 
-                    Level level = (Monocle.Engine.Scene as Level);
+                    Level level = Monocle.Engine.Scene as Level;
 
                     if (level == null)
                     {
